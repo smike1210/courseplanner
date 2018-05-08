@@ -8,7 +8,7 @@ The goal of this project is to be able develop a course explorer that has all th
 
 ## What's in our project?
   * Uses Node.js for backend.
-  * Uses embedded JavaScript files (_.ejs_) files for frontend to enable easy data transfer from backend to frontend
+  * Uses embedded JavaScript (_.ejs_) files for frontend to enable easy data transfer from backend to frontend
   * Uses previous semesters' GPA dataset [found here](https://github.com/smike1210/datasets).
   * Uses the (Course Explorer API)[https://courses.illinois.edu/cisdocs/explorer] to get the most up to date information.
   
