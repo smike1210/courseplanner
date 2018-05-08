@@ -1,5 +1,7 @@
 var middlewareObj = {};
 
+
+// called everytime a request is made to see if user is logged in or not.
 middlewareObj.isLoggedIn = function(req, res, next){
     if(req.isAuthenticated()){
         return next();

@@ -1,3 +1,7 @@
+/*
+MongoDB Schema that is used for each overall course
+*/
+
 var mongoose = require("mongoose");
 
 var courseSchema = new mongoose.Schema({

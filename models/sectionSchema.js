@@ -1,3 +1,7 @@
+/*
+MongoDB schema that is used for each section of a course
+*/
+
 var mongoose = require("mongoose");
 
 var sectionSchema = new mongoose.Schema({

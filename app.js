@@ -13,7 +13,9 @@ var express     = require("express"),
     methodOverride = require("method-override")
 
 mongoose.Promise = global.Promise;
+//uncomment if using local host
 //mongoose.connect("mongodb://localhost/courseRun");
+//online host for the mongoDB that is being used
 mongoose.connect("mongodb://Mike:courserun@ds155288.mlab.com:55288/course-run")
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
@@ -24,7 +26,7 @@ app.use(flash());
 
 
 app.use(require("express-session")({
-    secret: "Mike is a pretty cool person",
+    secret: "Mike Shea is a pretty cool person", // ha
     resave: false,
     saveUninitialized: false
 }));
@@ -36,50 +38,20 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use(function(req, res, next){
    res.locals.currentUser = req.user;
-   // res.locals.error = req.flash("error");
-   // res.locals.success = req.flash("success");
    next();
 });
 
+// uncomment if you want to seed the database with new data.
+// See the IR folder for more info
 //seedDB();
-// var profs = []
-// Section.find({},(err,sections) => {
-//   sections.forEach(function(ele){
-//     ele.professors.forEach(function(prof){
-//       profs.push(prof)
-//       //console.log(prof)
-//     })
-//   })
-// })
-//
-// var courses = []
-// Course.find({},(err,courses) => {
-//   courses.forEach(function(ele){
-//     courses.push(ele.abrCollege + " "+ele.number)
-//     //console.log(ele.abrCollege + " "+ele.number)
-//   })
-// })
-//
-// var colleges = []
-// Course.find({},(err,courses) => {
-//   courses.forEach(function(ele){
-//     if(!colleges.includes(ele.abrCollege)){
-//       colleges.push(ele.abrCollege)
-//       //console.log(ele.abrCollege)
-//     }
-//   })
-// })
-//
-// var courses = getCourses();
-// while(!courses){
-//   console.log("hi")
-// }
 
 
+// main landing page
 app.get("/", function(req, res){
     res.render("index.ejs");
 });
 
+// search page
 app.get("/search", function(req, res){
   Section.find({},function(err, Sections){
     if(err){
@@ -88,12 +60,15 @@ app.get("/search", function(req, res){
       res.render("search.ejs", {sections: Sections});
     }
   })
-
 });
+
+// register page
 app.get("/register", function(req, res){
     res.render("register.ejs");
 });
 
+// results page. Use query that user entered to find data in database to return
+// and then pass that info the rendered page
 app.get("/results", function(req, res){
     var query = req.url
     var lg = 0
@@ -123,41 +98,11 @@ app.get("/results", function(req, res){
     if(professors == "Choose..."){
       professors = ""
     }
-      // console.log(colleges)
-      // console.log(number)
-      // console.log(professors)
-      // console.log(lg)
-      // console.log(hg)
-    // Section.find({},function(err,Courses){
-    //   courses = []
-    //   if(err){
-    //     console.log(err.message)
-    //   } else {
-    //     Courses.forEach(function(course){
-    //       var splitName = course.parent.split(" ")
-    //       //console.log( splitName[0].indexOf(colleges) + " "+  course.professors.toString().indexOf(professors) + " "+  splitName[1].indexOf(number))
-    //       if( splitName[0].indexOf(colleges)>-1 && course.professors.toString().indexOf(professors)>-1 && splitName[1].indexOf(number)>-1){
-    //         console.log("searching " + course.parentCourse.toString())
-    //         Course.findById(course.parentCourse, function(err,co){
-    //           if(err){
-    //             console.log(err.message)
-    //           }
-    //           if (!courses.includes(co) && (co.avgGPA == -1 || (co.avgGPA>lg && co.avgGPA < hg))) {
-    //             console.log(!courses.includes(co))
-    //             courses.push(co)
-    //             console.log(co)
-    //           }
-    //         })
-    //       }
-    //     })
-    //   }
-    // })
     if(numbert != ""){
       Course.find({avgGPA: { $gt : lg}, abrCollege: "CS" , number:numbert}, function(err,Courses){
         if(err){
           console.log(err.message)
         } else {
-          //console.log(Courses)
           res.render("results.ejs" , {courses : Courses});
         }
       })
@@ -174,10 +119,13 @@ app.get("/results", function(req, res){
 
 });
 
-
+// login page
 app.get("/login", function(req, res){
     res.render("login.ejs");
 });
+
+// setup aaccount once initial acount created. Pass in info of courses so user
+// can say what courses they have taken and plan to take
 app.get("/accountsetup/:id", function(req, res){
   Course.find({},function(err, Courses){
     if(err){
@@ -189,21 +137,23 @@ app.get("/accountsetup/:id", function(req, res){
 
 });
 
+// posting user data to be registered
 app.post("/register", function(req, res){
     var newUser = new User({email: req.body.username, username:req.body.username});
     User.register(newUser, req.body.password, function(err, user){
         if(err){
-            //req.flash("error", err.message);
             console.log(err.message);
+            // if error, send back to register page
             return res.render("register");
         }
         passport.authenticate("local")(req, res, function(){
-           //req.flash("success", "Welcome to CourseRun " + user.username+"!");
            res.redirect("/accountsetup/"+user.id);
         });
     });
 });
 
+// update user info in DB once they have finished their account setup and send
+// user to search page
 app.put("/accountsetup/:id", function(req, res){
    User.findByIdAndUpdate(req.params.id, {address: req.body.street+" "+req.body.town+" "+req.body.state+" "+req.body.zip}, function(err, user){
       if(err){
@@ -273,6 +223,7 @@ app.put("/accountsetup/:id", function(req, res){
    });
 });
 
+// check credentials and redirect where necesary
 app.post("/login", passport.authenticate("local",
     {
         successRedirect: "/search",
@@ -280,13 +231,13 @@ app.post("/login", passport.authenticate("local",
     }), function(req, res){
 });
 
+//logout page
 app.get("/logout", function(req, res){
    req.logout();
    res.redirect("/")
-   // req.flash("success", "Logged you out!");
-   // res.redirect("/campgrounds");
 });
 
+// specific course page when user selects course
 app.get("/course/:id", function(req, res){
     Course.findById(req.params.id, function(err,course){
       if(err){
@@ -303,17 +254,20 @@ app.get("/course/:id", function(req, res){
   })
 });
 
-
+// main landing page
 app.get("/", function(req, res){
     res.render("home");
 });
 
+//go to about page
 app.get("/about", function(req, res){
     res.render("about");
 });
 
+// for local host
 app.listen(3000, function(){
    console.log("The Server Has Started!");
 });
 
+// for web hosting
 // app.listen(process.env.PORT, process.env.IP);

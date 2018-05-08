@@ -1,3 +1,7 @@
+/*
+MongoDB schema that is used for each user
+*/
+
 var mongoose = require("mongoose");
 
 var passportLocalMongoose = require("passport-local-mongoose");
